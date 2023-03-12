@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="yolov7_seg",
+    name="yolov7_segmentation",
     version="1.0.0",
     packages=setuptools.find_packages(),
     include_package_data=True,
