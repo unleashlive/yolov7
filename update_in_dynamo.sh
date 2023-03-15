@@ -8,6 +8,7 @@ SCRIPT_DIR="$(dirname -- "$0")"
 DIST_DIR="${SCRIPT_DIR%%/}/dist"
 VENV_DIR="${SCRIPT_DIR%%/}/venv"
 PACKAGE_NAME="$(basename "$(dirname "$(readlink -f -- "$0")")")"
+DESTINATION=$1
 
 PLUGINS_S3_BASE_CIRRUS="s3://plugins-syd-cirrus/cortex_plugins"
 PLUGINS_S3_BASE_CLOUD="s3://plugins-syd-cloud/cortex_plugins"
@@ -49,9 +50,16 @@ function update_in_dynamo() {
 package_file_path="$(ls "${DIST_DIR}"/"${PACKAGE_NAME}"*.tar.gz)"
 package_file_name=$(basename "${package_file_path}")
 
-package_s3_path_cirrus="${PLUGINS_S3_BASE_CIRRUS}/${PACKAGE_NAME}/${package_file_name}"
-update_in_dynamo "${package_s3_path_cirrus}" "unleash-dev"
+if [[ $DESTINATION == 'cirrus' ]]; then
+    package_s3_path_cirrus="${PLUGINS_S3_BASE_CIRRUS}/${PACKAGE_NAME}/${package_file_name}"
+    update_in_dynamo "${package_s3_path_cirrus}" "unleash-dev"
+elif [[ $DESTINATION == 'prod' ]]; then
+    package_s3_path_cloud="${PLUGINS_S3_BASE_CLOUD}/${PACKAGE_NAME}/${package_file_name}"
+    update_in_dynamo "${package_s3_path_cloud}" "unleash-prod"
+else
+    package_s3_path_cirrus="${PLUGINS_S3_BASE_CIRRUS}/${PACKAGE_NAME}/${package_file_name}"
+    update_in_dynamo "${package_s3_path_cirrus}" "unleash-dev"
 
-
-package_s3_path_cloud="${PLUGINS_S3_BASE_CLOUD}/${PACKAGE_NAME}/${package_file_name}"
-update_in_dynamo "${package_s3_path_cloud}" "unleash-prod"
+    package_s3_path_cloud="${PLUGINS_S3_BASE_CLOUD}/${PACKAGE_NAME}/${package_file_name}"
+    update_in_dynamo "${package_s3_path_cloud}" "unleash-prod"
+fi
