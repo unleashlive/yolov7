@@ -15,19 +15,19 @@ sys.path.insert(0,'.')
 import cv2
 import numpy as np
 import pandas as pd
-import requests
+# import requests
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 from torch.cuda import amp
 
-from utils.dataloaders import exif_transpose, letterbox
-from utils.general import (LOGGER, ROOT, Profile, check_requirements, check_suffix, check_version, colorstr,
+from yolov7_seg.utils.dataloaders import exif_transpose, letterbox
+from yolov7_seg.utils.general import (LOGGER, ROOT, Profile, check_requirements, check_suffix, check_version, colorstr,
                            increment_path, make_divisible, non_max_suppression, scale_coords, xywh2xyxy, xyxy2xywh,
                            yaml_load)
-from utils.plots import Annotator, colors, save_one_box
-from utils.torch_utils import copy_attr, smart_inference_mode
+from yolov7_seg.utils.plots import Annotator, colors, save_one_box
+from yolov7_seg.utils.torch_utils import copy_attr, smart_inference_mode
 
 
 def autopad(k, p=None):  # kernel, padding
@@ -391,12 +391,12 @@ class DetectMultiBackend(nn.Module):
         #   TensorFlow GraphDef:            *.pb
         #   TensorFlow Lite:                *.tflite
         #   TensorFlow Edge TPU:            *_edgetpu.tflite
-        from models.experimental import attempt_download, attempt_load  # scoped to avoid circular import
+        from yolov7_seg.models.experimental import attempt_load  # scoped to avoid circular import
 
         super().__init__()
         w = str(weights[0] if isinstance(weights, list) else weights)
         pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(w)  # get backend
-        w = attempt_download(w)  # download if not local
+        # w = attempt_download(w)  # download if not local
         fp16 &= pt or jit or onnx or engine  # FP16
         stride = 32  # default stride
 
@@ -612,7 +612,7 @@ class DetectMultiBackend(nn.Module):
     @staticmethod
     def _model_type(p='path/to/model.pt'):
         # Return model type from model path, i.e. path='path/to/model.onnx' -> type=onnx
-        from export import export_formats
+        from yolov7_seg.export import export_formats
         suffixes = list(export_formats().Suffix) + ['.xml']  # export suffixes
         check_suffix(p, suffixes)  # checks
         p = Path(p).name  # eliminate trailing separators
@@ -688,7 +688,7 @@ class AutoShape(nn.Module):
             for i, im in enumerate(ims):
                 f = f'image{i}'  # filename
                 if isinstance(im, (str, Path)):  # filename or uri
-                    im, f = Image.open(requests.get(im, stream=True).raw if str(im).startswith('http') else im), im
+                    # im, f = Image.open(requests.get(im, stream=True).raw if str(im).startswith('http') else im), im
                     im = np.asarray(exif_transpose(im))
                 elif isinstance(im, Image.Image):  # PIL Image
                     im, f = np.asarray(exif_transpose(im)), getattr(im, 'filename', f) or f

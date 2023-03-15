@@ -33,9 +33,9 @@ import torch
 import torchvision
 import yaml
 
-from utils import TryExcept
-from utils.downloads import gsutil_getsize
-from utils.metrics import box_iou, fitness
+from yolov7_seg.utils import TryExcept
+from yolov7_seg.utils.downloads import gsutil_getsize
+from yolov7_seg.utils.metrics import box_iou, fitness
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
@@ -777,15 +777,18 @@ def resample_segments(segments, n=1000):
 def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
     # Rescale coords (xyxy) from img1_shape to img0_shape
     if ratio_pad is None:  # calculate from img0_shape
-        gain = min(img1_shape[0] / img0_shape[0], img1_shape[1] / img0_shape[1])  # gain  = old / new
-        pad = (img1_shape[1] - img0_shape[1] * gain) / 2, (img1_shape[0] - img0_shape[0] * gain) / 2  # wh padding
+        # gain = min(img1_shape[0] / img0_shape[0], img1_shape[1] / img0_shape[1])  # gain  = old / new
+        ygain, xgain = img1_shape[0] / img0_shape[0], img1_shape[1] / img0_shape[1]  # gain  = old / new
+        pad = (img1_shape[1] - img0_shape[1] * xgain) / 2, (img1_shape[0] - img0_shape[0] * ygain) / 2  # wh padding
     else:
-        gain = ratio_pad[0][0]
+        xgain, ygain = ratio_pad[0][0], ratio_pad[0][0]
         pad = ratio_pad[1]
 
     coords[:, [0, 2]] -= pad[0]  # x padding
     coords[:, [1, 3]] -= pad[1]  # y padding
-    coords[:, :4] /= gain
+    coords[:, [0, 2]] /= xgain  # x gain
+    coords[:, [1, 3]] /= ygain  # y gain
+    # coords[:, :4] /= gain
     clip_coords(coords, img0_shape)
     return coords
 

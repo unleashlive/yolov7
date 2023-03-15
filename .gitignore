@@ -1,0 +1,12 @@
+__pycache__/
+.venv/
+venv/
+.vscode/
+build/
+dist/
+*.pyc
+*.jpg
+*.jpeg
+*.png    
+*.pt
+*.egg*
